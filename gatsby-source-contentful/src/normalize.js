@@ -436,8 +436,7 @@ exports.createContentTypeNodes = ({
             entryNode,
             entryItemFieldKey,
             entryItemFields[entryItemFieldKey],
-            createNodeId,
-            {resolvable, mId},
+            createNodeId
           )
 
           childrenNodes.push(richTextNode)
