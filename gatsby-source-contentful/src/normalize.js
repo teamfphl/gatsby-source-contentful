@@ -218,7 +218,7 @@ function replaceEntryByResolvable(data, target, key, {resolvable, mId}) {
   return id;
 }
 
-function prepareRichTextNode(node, key, content, createNodeId, nodeOptions) {
+function prepareRichTextNode(node, key, content, createNodeId) {
   const str = stringify(content)
   const children = [];
   replaceContentTargets(content, children, nodeOptions);
@@ -436,7 +436,8 @@ exports.createContentTypeNodes = ({
             entryNode,
             entryItemFieldKey,
             entryItemFields[entryItemFieldKey],
-            createNodeId
+            createNodeId,
+            {resolvable, mId},
           )
 
           childrenNodes.push(richTextNode)
@@ -451,8 +452,7 @@ exports.createContentTypeNodes = ({
             entryNode,
             entryItemFieldKey,
             entryItemFields[entryItemFieldKey],
-            createNodeId,
-            {resolvable, mId},
+            createNodeId
           )
 
           childrenNodes.push(jsonNode)
