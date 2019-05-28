@@ -193,16 +193,31 @@ function prepareTextNode(node, key, text, createNodeId) {
   return textNode
 }
 
+function filterConflictingFields(fields) {
+  const locale = 'en-NZ';
+  return Object.keys(fields).reduce((filteredFields, key) => {
+    const field = fields[key];
+    const value = field[locale];
+    if(typeof value !== "object" && !Array.isArray(value)) {
+      filteredFields[key] = field;
+    }
+    return filteredFields;
+  }, {});
+}
+
 function replaceEntryFields(document) {
   document.content.forEach(entry => {
-    if(entry.nodeType === "entry-hyperlink" && (entry.data && entry.data.target && entry.data.target.sys && entry.data.target.sys.id)) {
+    if (entry.nodeType === "entry-hyperlink" && entry.data && entry.data.target && entry.data.target.sys && entry.data.target.sys.id) {
       const target = entry.data.target;
-      if(target.fields.slug) {
-        target.fields = { slug: target.fields.slug }
+      if(target.fields) {
+        const safeFields = filterConflictingFields(target.fields)
+        target.fields = {
+          ...safeFields
+        }
       }
-    };
+    }
 
-    if(entry.content) {
+    if (entry.content) {
       replaceEntryFields(entry);
     }
   });
