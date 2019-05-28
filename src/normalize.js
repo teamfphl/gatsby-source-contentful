@@ -193,7 +193,12 @@ function prepareTextNode(node, key, text, createNodeId) {
   return textNode
 }
 
-function filterConflictingFields(fields) {
+function filterConflictingFields(target) {
+  const fields = target.fields;
+  if(target.sys.contentType.sys.id === "gallery") {
+    return fields;
+  }
+  
   const locale = 'en-NZ';
   return Object.keys(fields).reduce((filteredFields, key) => {
     const field = fields[key];
@@ -210,7 +215,7 @@ function replaceEntryFields(document) {
     if (entry.nodeType === "entry-hyperlink" && entry.data && entry.data.target && entry.data.target.sys && entry.data.target.sys.id) {
       const target = entry.data.target;
       if(target.fields) {
-        const safeFields = filterConflictingFields(target.fields)
+        const safeFields = filterConflictingFields(target)
         target.fields = {
           ...safeFields
         }
