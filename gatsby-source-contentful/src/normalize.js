@@ -193,7 +193,24 @@ function prepareTextNode(node, key, text, createNodeId) {
   return textNode
 }
 
+function replaceEntryFields(document) {
+  document.content.forEach(entry => {
+    if(entry.nodeType === "entry-hyperlink" && (entry.data && entry.data.target && entry.data.target.sys && entry.data.target.sys.id)) {
+      const target = entry.data.target;
+      if(target.fields.slug) {
+        target.fields = { slug: target.fields.slug }
+      }
+    };
+
+    if(entry.content) {
+      replaceEntryFields(entry);
+    }
+  });
+  return document;
+}
+
 function prepareRichTextNode(node, key, originalContent, createNodeId) {
+  const content = replaceEntryFields(originalContent);
   const str = stringify(content);
   const richTextNode = {
     ...content,
