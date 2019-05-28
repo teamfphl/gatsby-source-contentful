@@ -211,6 +211,7 @@ function replaceEntryFields(document) {
 
 function prepareRichTextNode(node, key, originalContent, createNodeId) {
   const content = replaceEntryFields(originalContent);
+  const str = stringify(content);
   const richTextNode = {
     ...content,
     id: createNodeId(`${node.id}${key}RichTextNode`),
