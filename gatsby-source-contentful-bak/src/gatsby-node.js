@@ -5,8 +5,6 @@ const fs = require(`fs-extra`)
 
 const normalize = require(`./normalize`)
 const fetchData = require(`./fetch`)
-const { createPluginConfig, validateOptions } = require(`./plugin-options`)
-const { downloadContentfulAssets } = require(`./download-contentful-assets`)
 
 const conflictFieldPrefix = `contentful`
 
@@ -22,7 +20,6 @@ const restrictedNodeFields = [
 
 exports.setFieldsOnGraphQLNodeType = require(`./extend-node-type`).extendNodeType
 
-exports.onPreBootstrap = validateOptions
 /***
  * Localization algorithm
  *
@@ -35,8 +32,8 @@ exports.onPreBootstrap = validateOptions
  */
 
 exports.sourceNodes = async (
-  { actions, getNode, getNodes, createNodeId, store, cache, reporter },
-  pluginOptions
+  { actions, getNode, getNodes, createNodeId, hasNodeChanged, store },
+  options
 ) => {
   const { createNode, deleteNode, touchNode, setPluginStatus } = actions
 
@@ -61,13 +58,11 @@ exports.sourceNodes = async (
     return
   }
 
-  const pluginConfig = createPluginConfig(pluginOptions)
-
   const createSyncToken = () =>
-    `${pluginConfig.get(`spaceId`)}-${pluginConfig.get(
-      `environment`
-    )}-${pluginConfig.get(`host`)}`
+    `${options.spaceId}-${options.environment}-${options.host}`
 
+  options.host = options.host || `cdn.contentful.com`
+  options.environment = options.environment || `master` // default is always master
   // Get sync token if it exists.
   let syncToken
   if (
@@ -89,8 +84,7 @@ exports.sourceNodes = async (
     locales,
   } = await fetchData({
     syncToken,
-    reporter,
-    pluginConfig,
+    ...options,
   })
 
   const entryList = normalize.buildEntryList({
@@ -214,16 +208,6 @@ exports.sourceNodes = async (
       locales,
     })
   })
-
-  if (pluginConfig.get(`downloadLocal`)) {
-    await downloadContentfulAssets({
-      actions,
-      createNodeId,
-      store,
-      cache,
-      getNodes,
-    })
-  }
 
   return
 }
