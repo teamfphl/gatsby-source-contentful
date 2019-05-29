@@ -193,31 +193,36 @@ function prepareTextNode(node, key, text, createNodeId) {
   return textNode
 }
 
+const SAFE_FIELD_KEYS = [
+  'url',
+  'userSection',
+  'slug',
+  'title',
+];
+
 function filterConflictingFields(target) {
   const fields = target.fields;
-  if(target.sys.contentType.sys.id === "gallery") {
-    return fields;
-  }
-  
-  const locale = 'en-NZ';
-  return Object.keys(fields).reduce((filteredFields, key) => {
-    const field = fields[key];
-    const value = field[locale];
-    if(typeof value !== "object" && !Array.isArray(value)) {
-      filteredFields[key] = field;
+  const safeFields = {};
+  SAFE_FIELD_KEYS.forEach(key => {
+    if(fields.hasOwnProperty(key)) {
+      safeFields[key] = fields[key];
     }
-    return filteredFields;
-  }, {});
+  });
+  return safeFields;
 }
 
 function replaceEntryFields(document) {
   document.content.forEach(entry => {
     if (entry.nodeType === "entry-hyperlink" && entry.data && entry.data.target && entry.data.target.sys && entry.data.target.sys.id) {
       const target = entry.data.target;
-      if(target.fields) {
-        const safeFields = filterConflictingFields(target)
-        target.fields = {
-          ...safeFields
+
+      if (target.fields) {
+        const safeFields = filterConflictingFields(target);
+        entry.data.target = {
+          ...target,
+          fields: {
+            ...safeFields
+          }
         }
       }
     }
